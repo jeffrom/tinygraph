@@ -73,9 +73,15 @@ func newRootCmd() *cobra.Command {
 	cfg := &config{}
 	rootCmd := &cobra.Command{
 		Use:   "tinygraph",
-		Short: "print a single character graph",
-		Long:  `tinygraph prints a graph using a single unicode character.`,
-		Args:  cobra.NoArgs,
+		Short: "print a graph",
+		Long: `tinygraph prints a graph using a single character.
+
+Use one of the provided charts, or bring your own:
+
+tinygraph --custom "1,2,3" -n 4 -t 10
+# 2
+`,
+		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return start(cfg, args)
 		},
@@ -83,7 +89,7 @@ func newRootCmd() *cobra.Command {
 
 	flags := rootCmd.Flags()
 	flags.StringVarP(&cfg.GraphName, "graph", "c", "bar", "NAME of the graph (bar, horizbar, integral, equal)")
-	flags.StringArrayVar(&cfg.CustomGraph, "custom", nil, "use your own custom graph")
+	flags.StringSliceVar(&cfg.CustomGraph, "custom", nil, "use your own custom graph")
 	flags.IntVarP(&cfg.N, "amount", "n", 0, "amount to graph")
 	flags.IntVarP(&cfg.Total, "total", "t", 0, "total to graph against amount")
 	flags.BoolVar(&cfg.Workout, "workout", false, "show me the graphs")
