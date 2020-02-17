@@ -12,9 +12,9 @@ var defaultThresholds []string
 
 func init() {
 	if os.Getenv("TMUX_STATUS") != "" {
-		defaultThresholds = []string{"70:#[fg=yellow,bold]", "90:#[fg=red,bold]"}
+		defaultThresholds = []string{"60:#[fg=yellow,bold]", "83:#[fg=red,bold]"}
 	} else {
-		defaultThresholds = []string{"70:\033[1;33m:\033[0m", "90:\033[1;31m:\033[0m"}
+		defaultThresholds = []string{"60:\033[1;33m:\033[0m", "83:\033[1;31m:\033[0m"}
 	}
 }
 

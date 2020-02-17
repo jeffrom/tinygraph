@@ -80,6 +80,7 @@ var IntegralGraph = Graph{
 }
 
 var EqualSignGraph = Graph{
+	' ',
 	0x22C5,
 	'-',
 	0x223C,
