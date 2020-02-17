@@ -34,15 +34,16 @@ func Custom(chars []string) Graph {
 
 type Graph []rune
 
-func (c Graph) Render(w io.Writer, n, total int) error {
+func (c Graph) Render(w io.Writer, n, total int, prefix string, thresholds Thresholds) error {
+	t := getThreshold(n, total, thresholds)
 	if n == 0 || total == 0 {
-		return write(w, c[0])
+		return write(w, c[0], prefix, t)
 	}
 	if n == total {
-		return write(w, c[len(c)-1])
+		return write(w, c[len(c)-1], prefix, t)
 	}
 	final := (len(c) * n) / total
-	return write(w, c[final])
+	return write(w, c[final], prefix, t)
 }
 
 var BlockGraph = Graph{
@@ -92,12 +93,34 @@ var EqualSignGraph = Graph{
 	0x2263,
 }
 
-func write(w io.Writer, r rune) error {
+func write(w io.Writer, r rune, prefix string, t *Threshold) error {
 	b := make([]byte, utf8.UTFMax)
 	utf8.EncodeRune(b, r)
+
+	if t != nil {
+		_, err := w.Write([]byte(t.Prefix))
+		if err != nil {
+			return err
+		}
+	}
+
+	if prefix != "" {
+		_, err := w.Write([]byte(prefix))
+		if err != nil {
+			return err
+		}
+	}
+
 	_, err := w.Write(b)
 	if err != nil {
 		return err
+	}
+
+	if t != nil && t.Suffix != "" {
+		_, err := w.Write([]byte(t.Suffix))
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

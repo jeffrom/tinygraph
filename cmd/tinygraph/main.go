@@ -8,12 +8,28 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func workout() {
+var defaultThresholds []string
+
+func init() {
+	if os.Getenv("TMUX_STATUS") != "" {
+		defaultThresholds = []string{"70:#[fg=yellow,bold]", "90:#[fg=red,bold]"}
+	} else {
+		defaultThresholds = []string{"70:\033[1;33m:\033[0m", "90:\033[1;31m:\033[0m"}
+	}
+}
+
+func workout(cfg *config) {
+	fmt.Printf("%q\n", cfg.Thresholds)
+	ts, err := tinygraph.NewThresholds(cfg.Thresholds...)
+	if err != nil {
+		panic(err)
+	}
+
 	graph := tinygraph.BlockGraph
 	fmt.Println()
 	fmt.Println()
 	for i := 0; i < 10; i++ {
-		if err := graph.Render(os.Stdout, i, 10); err != nil {
+		if err := graph.Render(os.Stdout, i, 10, "", ts); err != nil {
 			panic(err)
 		}
 	}
@@ -21,7 +37,7 @@ func workout() {
 	fmt.Println()
 	fmt.Println()
 	for i := 0; i < 100; i++ {
-		if err := graph.Render(os.Stdout, i, 100); err != nil {
+		if err := graph.Render(os.Stdout, i, 100, "", ts); err != nil {
 			panic(err)
 		}
 	}
@@ -29,7 +45,7 @@ func workout() {
 	fmt.Println()
 	fmt.Println()
 	for i := 0; i < 63; i++ {
-		if err := graph.Render(os.Stdout, i, 100); err != nil {
+		if err := graph.Render(os.Stdout, i, 100, "", ts); err != nil {
 			panic(err)
 		}
 	}
@@ -37,7 +53,7 @@ func workout() {
 	fmt.Println()
 	fmt.Println()
 	for i := 0; i < len(tinygraph.IntegralGraph); i++ {
-		if err := tinygraph.IntegralGraph.Render(os.Stdout, i, len(tinygraph.IntegralGraph)); err != nil {
+		if err := tinygraph.IntegralGraph.Render(os.Stdout, i, len(tinygraph.IntegralGraph), "", ts); err != nil {
 			panic(err)
 		}
 	}
@@ -45,7 +61,7 @@ func workout() {
 	fmt.Println()
 	fmt.Println()
 	for i := 0; i < len(tinygraph.EqualSignGraph); i++ {
-		if err := tinygraph.EqualSignGraph.Render(os.Stdout, i, len(tinygraph.EqualSignGraph)); err != nil {
+		if err := tinygraph.EqualSignGraph.Render(os.Stdout, i, len(tinygraph.EqualSignGraph), "", ts); err != nil {
 			panic(err)
 		}
 	}
@@ -54,7 +70,7 @@ func workout() {
 	fmt.Println()
 	graph = tinygraph.HorizontalBlockGraph
 	for i := 0; i < 10; i++ {
-		if err := graph.Render(os.Stdout, i, 10); err != nil {
+		if err := graph.Render(os.Stdout, i, 10, "", ts); err != nil {
 			panic(err)
 		}
 		fmt.Println()
@@ -67,6 +83,8 @@ type config struct {
 	Total       int
 	Workout     bool
 	CustomGraph []string
+	Thresholds  []string
+	Prefix      string
 }
 
 func newRootCmd() *cobra.Command {
@@ -89,7 +107,9 @@ tinygraph --custom "1,2,3" -n 4 -t 10
 
 	flags := rootCmd.Flags()
 	flags.StringVarP(&cfg.GraphName, "graph", "c", "bar", "NAME of the graph (bar, horizbar, integral, equal)")
+	flags.StringVarP(&cfg.Prefix, "prefix", "p", "", "Prefix string for the graph")
 	flags.StringSliceVar(&cfg.CustomGraph, "custom", nil, "use your own custom graph")
+	flags.StringSliceVar(&cfg.Thresholds, "threshold", defaultThresholds, "set a threshold with color code")
 	flags.IntVarP(&cfg.N, "amount", "n", 0, "amount to graph")
 	flags.IntVarP(&cfg.Total, "total", "t", 0, "total to graph against amount")
 	flags.BoolVar(&cfg.Workout, "workout", false, "show me the graphs")
@@ -99,7 +119,7 @@ tinygraph --custom "1,2,3" -n 4 -t 10
 
 func start(cfg *config, args []string) error {
 	if cfg.Workout {
-		workout()
+		workout(cfg)
 		return nil
 	}
 	var graph tinygraph.Graph
@@ -112,7 +132,11 @@ func start(cfg *config, args []string) error {
 			return err
 		}
 	}
-	return graph.Render(os.Stdout, cfg.N, cfg.Total)
+	thresholds, err := tinygraph.NewThresholds(cfg.Thresholds...)
+	if err != nil {
+		return err
+	}
+	return graph.Render(os.Stdout, cfg.N, cfg.Total, cfg.Prefix, thresholds)
 }
 
 func main() {
