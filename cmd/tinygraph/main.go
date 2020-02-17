@@ -19,7 +19,7 @@ func init() {
 }
 
 func workout(cfg *config) {
-	fmt.Printf("%q\n", cfg.Thresholds)
+	fmt.Printf("thresholds: %q\n", cfg.Thresholds)
 	ts, err := tinygraph.NewThresholds(cfg.Thresholds...)
 	if err != nil {
 		panic(err)
@@ -106,10 +106,10 @@ tinygraph --custom "1,2,3" -n 4 -t 10
 	}
 
 	flags := rootCmd.Flags()
-	flags.StringVarP(&cfg.GraphName, "graph", "c", "bar", "NAME of the graph (bar, horizbar, integral, equal)")
+	flags.StringVarP(&cfg.GraphName, "graph", "g", "bar", "NAME of the graph (bar, horizbar, integral, equal)")
 	flags.StringVarP(&cfg.Prefix, "prefix", "p", "", "Prefix string for the graph")
 	flags.StringSliceVar(&cfg.CustomGraph, "custom", nil, "use your own custom graph")
-	flags.StringSliceVar(&cfg.Thresholds, "threshold", defaultThresholds, "set a threshold with color code")
+	flags.StringArrayVar(&cfg.Thresholds, "threshold", defaultThresholds, "set a threshold with color code")
 	flags.IntVarP(&cfg.N, "amount", "n", 0, "amount to graph")
 	flags.IntVarP(&cfg.Total, "total", "t", 0, "total to graph against amount")
 	flags.BoolVar(&cfg.Workout, "workout", false, "show me the graphs")

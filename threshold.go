@@ -2,9 +2,14 @@ package tinygraph
 
 import (
 	"errors"
+	"fmt"
+	"os"
 	"regexp"
 	"strconv"
+	"strings"
 )
+
+var isTmuxStatus = os.Getenv("TMUX_STATUS") != ""
 
 var thresholdRe = regexp.MustCompile(`^([0-9]+):([^:]+):?(.+)?$`)
 
@@ -14,6 +19,41 @@ type Threshold struct {
 	N      int
 	Prefix string
 	Suffix string
+	parsed bool
+	isANSI bool
+}
+
+func (t *Threshold) For(s, prefix string) string {
+	if t == nil {
+		return prefix + s
+	}
+	if isTmuxStatus {
+		return fmt.Sprintf("#[%s]%s%s", t.Prefix, prefix, s)
+	}
+
+	t.parse()
+	if t.isANSI {
+		return fmt.Sprintf("\033[38;5;%sm%s%s\033[39;49m", t.Prefix, prefix, s)
+	}
+
+	return t.Prefix + s + t.Suffix
+}
+
+func (t *Threshold) parse() {
+	if t.parsed {
+		return
+	}
+	defer func() {
+		t.parsed = true
+	}()
+
+	parts := strings.SplitN(t.Prefix, ",", 2)
+	_, err := strconv.ParseInt(parts[0], 10, 16)
+	if err != nil {
+		// still want to pass through the string in this case
+		return
+	}
+	t.isANSI = true
 }
 
 func NewThresholds(raw ...string) (Thresholds, error) {
@@ -48,6 +88,7 @@ func newThreshold(s string) (*Threshold, error) {
 	}
 	return t, nil
 }
+
 func getThreshold(n, total int, thresholds Thresholds) *Threshold {
 	outOf100 := (n * 100) / total
 	var t *Threshold

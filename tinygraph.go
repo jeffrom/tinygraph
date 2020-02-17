@@ -98,30 +98,10 @@ func write(w io.Writer, r rune, prefix string, t *Threshold) error {
 	b := make([]byte, utf8.UTFMax)
 	utf8.EncodeRune(b, r)
 
-	if t != nil {
-		_, err := w.Write([]byte(t.Prefix))
-		if err != nil {
-			return err
-		}
-	}
-
-	if prefix != "" {
-		_, err := w.Write([]byte(prefix))
-		if err != nil {
-			return err
-		}
-	}
-
-	_, err := w.Write(b)
+	_, err := w.Write([]byte(t.For(string(b), prefix)))
 	if err != nil {
 		return err
 	}
 
-	if t != nil && t.Suffix != "" {
-		_, err := w.Write([]byte(t.Suffix))
-		if err != nil {
-			return err
-		}
-	}
 	return nil
 }
