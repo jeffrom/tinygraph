@@ -38,6 +38,9 @@ func (c Graph) Render(w io.Writer, n, total int) error {
 	if n == 0 || total == 0 {
 		return write(w, c[0])
 	}
+	if n == total {
+		return write(w, c[len(c)-1])
+	}
 	final := (len(c) * n) / total
 	return write(w, c[final])
 }
