@@ -1,4 +1,4 @@
-module github.com/jeffrom/tinychart
+module github.com/jeffrom/tinygraph
 
 go 1.13
 

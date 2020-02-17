@@ -1,4 +1,4 @@
-package tinychart
+package tinygraph
 
 import (
 	"fmt"
@@ -8,33 +8,33 @@ import (
 
 const singleSpace = ' '
 
-var charts = map[string]Chart{
-	"bar":      BlockChart,
-	"horizbar": HorizontalBlockChart,
-	"integral": IntegralChart,
-	"equal":    EqualSignChart,
+var graphs = map[string]Graph{
+	"bar":      BlockGraph,
+	"horizbar": HorizontalBlockGraph,
+	"integral": IntegralGraph,
+	"equal":    EqualSignGraph,
 }
 
-func ByName(name string) (Chart, error) {
-	chart, ok := charts[name]
+func ByName(name string) (Graph, error) {
+	graph, ok := graphs[name]
 	if !ok {
-		return nil, fmt.Errorf("chart not found: %q", name)
+		return nil, fmt.Errorf("graph not found: %q", name)
 	}
-	return chart, nil
+	return graph, nil
 }
 
-func Custom(chars []string) Chart {
+func Custom(chars []string) Graph {
 	var runes []rune
 	for _, s := range chars {
 		r, _ := utf8.DecodeRuneInString(s)
 		runes = append(runes, r)
 	}
-	return Chart(runes)
+	return Graph(runes)
 }
 
-type Chart []rune
+type Graph []rune
 
-func (c Chart) Render(w io.Writer, n, total int) error {
+func (c Graph) Render(w io.Writer, n, total int) error {
 	if n == 0 || total == 0 {
 		return write(w, c[0])
 	}
@@ -42,7 +42,7 @@ func (c Chart) Render(w io.Writer, n, total int) error {
 	return write(w, c[final])
 }
 
-var BlockChart = Chart{
+var BlockGraph = Graph{
 	singleSpace,
 	0x2581,
 	0x2582,
@@ -54,7 +54,7 @@ var BlockChart = Chart{
 	0x2588,
 }
 
-var HorizontalBlockChart = Chart{
+var HorizontalBlockGraph = Graph{
 	singleSpace,
 	0x258F,
 	0x258E,
@@ -66,7 +66,7 @@ var HorizontalBlockChart = Chart{
 	0x2588,
 }
 
-var IntegralChart = Chart{
+var IntegralGraph = Graph{
 	0x222B,
 	0x222E,
 	0x222C,
@@ -75,7 +75,7 @@ var IntegralChart = Chart{
 	0x2230,
 }
 
-var EqualSignChart = Chart{
+var EqualSignGraph = Graph{
 	0x22C5,
 	'-',
 	0x223C,
