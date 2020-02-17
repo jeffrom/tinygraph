@@ -98,6 +98,13 @@ Use one of the provided charts, or bring your own:
 
 tinygraph --custom "1,2,3" -n 4 -t 10
 # 2
+
+You can also set custom thresholds to add 256 color codes, tmux status, or
+arbitrary strings:
+
+tinygraph --threshold '50:24' --threshold '60:35'
+
+It's helpful to use --workout when trying thresholds.
 `,
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
